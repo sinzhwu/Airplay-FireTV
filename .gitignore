@@ -1,0 +1,41 @@
+# Gradle files
+.gradle/
+build/
+
+# Local configuration file (sdk path, etc)
+local.properties
+
+# Android Studio / IntelliJ
+*.iml
+.idea/
+*.iws
+*.ipr
+
+# Gradle Wrapper - do NOT ignore these for CI
+# gradlew
+# gradlew.bat
+# gradle/wrapper/gradle-wrapper.jar
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build outputs
+app/build/
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# Signing files
+*.jks
+*.keystore
+keystore.properties
+
+# Log files
+*.log
+
+# Cache
+.cxx/
+.externalNativeBuild/
+captures/
