@@ -18,16 +18,16 @@ class StreamingViewModel(application: Application) : AndroidViewModel(applicatio
     private val serviceController = ServiceController(application)
     private val settingsRepository = SettingsRepository(application)
 
-    val settings: StateFlow<AppSettings> = settingsRepository.settingsFlow
+    val settings: StateFlow<AppSettings> = settingsRepository.settings
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AppSettings())
 
-    val receiverState: StateFlow<ReceiverState>?
+    val receiverState: StateFlow<ReceiverState>
         get() = serviceController.receiverState
 
-    val streaming: StateFlow<Boolean>?
+    val streaming: StateFlow<Boolean>
         get() = serviceController.streaming
 
-    val isRunning: StateFlow<Boolean>?
+    val isRunning: StateFlow<Boolean>
         get() = serviceController.isRunning
 
     init {

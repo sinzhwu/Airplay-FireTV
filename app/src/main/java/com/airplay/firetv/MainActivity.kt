@@ -5,11 +5,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.shape.RectangleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
 import com.airplay.firetv.airplay.ReceiverState
@@ -36,7 +38,7 @@ class MainActivity : ComponentActivity() {
             AirPlayTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    shape = MaterialTheme.shapes.none
+                    shape = RectangleShape
                 ) {
                     AirPlayApp(viewModel = viewModel, serviceController = serviceController)
                 }
@@ -56,13 +58,13 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 fun AirPlayApp(
     viewModel: StreamingViewModel,
     serviceController: ServiceController
 ) {
-    val receiverState by viewModel.receiverState?.collectAsStateWithLifecycle(ReceiverState.IDLE)
-        ?: return
+    val receiverState by viewModel.receiverState.collectAsStateWithLifecycle(ReceiverState.IDLE)
 
     LaunchedEffect(Unit) {
         Timber.d("AirPlayApp composition started")

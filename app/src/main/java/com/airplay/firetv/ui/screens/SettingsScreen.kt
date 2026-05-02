@@ -10,7 +10,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -18,6 +20,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Button
@@ -28,7 +31,6 @@ import androidx.tv.material3.OutlinedButton
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Switch
 import androidx.tv.material3.Text
-import androidx.tv.material3.TextField
 import com.airplay.firetv.settings.AppSettings
 import com.airplay.firetv.ui.viewmodel.StreamingViewModel
 
@@ -39,7 +41,7 @@ fun SettingsScreen(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val settings by viewModel.settings
+    val settings by viewModel.settings.collectAsState()
 
     var displayName by remember { mutableStateOf(settings.displayName) }
     var autoStart by remember { mutableStateOf(settings.autoStart) }
@@ -77,10 +79,22 @@ fun SettingsScreen(
                     color = Color.Gray
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                TextField(
+                BasicTextField(
                     value = displayName,
                     onValueChange = { displayName = it },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(
+                            color = Color(0x33FFFFFF),
+                            shape = androidx.compose.foundation.shape.RoundedCornerShape(4.dp)
+                        )
+                        .padding(horizontal = 12.dp, vertical = 10.dp),
+                    textStyle = androidx.compose.ui.text.TextStyle(
+                        color = Color.White,
+                        fontSize = androidx.compose.ui.unit.sp(16)
+                    ),
+                    cursorBrush = SolidColor(Color.White),
+                    singleLine = true
                 )
             }
 

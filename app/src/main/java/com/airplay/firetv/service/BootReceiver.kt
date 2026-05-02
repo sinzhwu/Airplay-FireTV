@@ -6,6 +6,7 @@ import android.content.Intent
 import com.airplay.firetv.settings.SettingsRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -20,7 +21,7 @@ class BootReceiver : BroadcastReceiver() {
         scope.launch {
             try {
                 val repository = SettingsRepository(context)
-                val settings = repository.settingsFlow.value
+                val settings = repository.settings.first()
 
                 if (settings.autoStart) {
                     Timber.i("Auto-start enabled, launching PhairPlayService")

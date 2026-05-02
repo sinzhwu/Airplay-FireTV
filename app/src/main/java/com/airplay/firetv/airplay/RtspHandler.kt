@@ -34,7 +34,7 @@ class RtspHandler(
                             response.headers["CSeq"] = "0"
                             socket.getOutputStream().write(response.toBytes())
                             socket.close()
-                        } catch (_: Exception) {}
+                        } catch (e: Exception) {}
                         continue
                     }
 
@@ -54,7 +54,7 @@ class RtspHandler(
         isRunning = false
         activeSession?.stop()
         activeSession = null
-        try { serverSocket?.close() } catch (_: Exception) {}
+        try { serverSocket?.close() } catch (e: Exception) {}
         supervisorJob.cancel()
     }
 }

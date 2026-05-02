@@ -3,6 +3,7 @@ package com.airplay.firetv.airplay
 import android.content.Context
 import android.view.Surface
 import com.airplay.firetv.settings.AppSettings
+import com.airplay.firetv.util.NetworkUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -67,7 +68,9 @@ class AirPlayReceiver(private val context: Context) : RtspSession.RtspCallback {
 
                 // Start mDNS advertising
                 mdnsService = MdnsService(context).apply {
-                    register(settings.displayName)
+                    val macAddress = NetworkUtils.getMacAddress(context)
+                    val persistentUuid = NetworkUtils.generatePersistentUuid(macAddress)
+                    start(settings.displayName, macAddress, persistentUuid)
                 }
 
                 Timber.i("AirPlayReceiver started successfully")
@@ -90,9 +93,9 @@ class AirPlayReceiver(private val context: Context) : RtspSession.RtspCallback {
             releaseAudioComponents()
 
             try {
-                mdnsService?.unregister()
+                mdnsService?.stop()
             } catch (e: Exception) {
-                Timber.w(e, "Error unregistering mDNS")
+                Timber.w(e, "Error stopping mDNS")
             }
             mdnsService = null
 

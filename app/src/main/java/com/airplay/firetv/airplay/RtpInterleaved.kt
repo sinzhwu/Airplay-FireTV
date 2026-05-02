@@ -6,7 +6,7 @@ import java.io.InputStream
 object RtpInterleaved {
 
     private const val MAX_FRAME_SIZE = 2 * 1024 * 1024 // 2MB safety limit
-    private const val START_CODE = byteArrayOf(0x00, 0x00, 0x00, 0x01)
+    private val START_CODE = byteArrayOf(0x00, 0x00, 0x00, 0x01)
 
     /**
      * Audio RTP时钟频率，默认44100Hz。
