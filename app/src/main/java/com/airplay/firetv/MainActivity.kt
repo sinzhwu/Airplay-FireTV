@@ -5,7 +5,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.shape.RectangleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -37,8 +36,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             AirPlayTheme {
                 Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    shape = RectangleShape
+                    modifier = Modifier.fillMaxSize()
                 ) {
                     AirPlayApp(viewModel = viewModel, serviceController = serviceController)
                 }

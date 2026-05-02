@@ -27,7 +27,7 @@ class RtspHandler(
                     val socket = serverSocket?.accept() ?: break
                     Timber.i("RTSP client connected: ${socket.inetAddress}")
 
-                    activeSession?.let {
+                    if (activeSession != null) {
                         Timber.w("Active session exists, rejecting new connection")
                         try {
                             val response = RtspResponse.serviceUnavailable()
