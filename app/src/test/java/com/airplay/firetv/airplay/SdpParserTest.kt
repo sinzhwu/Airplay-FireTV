@@ -33,10 +33,10 @@ class SdpParserTest {
 
         assertEquals(44100, audioParams.sampleRate)
         assertEquals(2, audioParams.channelCount)
-        assertNotNull(audioParams.asc)
-        assertEquals(2, audioParams.asc!!.size)
-        assertEquals(0x11.toByte(), audioParams.asc!![0])
-        assertEquals(0x90.toByte(), audioParams.asc!![1])
+        assertNotNull(audioParams.audioSpecificConfig)
+        assertEquals(2, audioParams.audioSpecificConfig!!.size)
+        assertEquals(0x11.toByte(), audioParams.audioSpecificConfig!![0])
+        assertEquals(0x90.toByte(), audioParams.audioSpecificConfig!![1])
     }
 
     @Test
@@ -76,8 +76,8 @@ class SdpParserTest {
         val audioMedia = result.getAudioMedia()!!
         val audioParams = SdpParser.parseAudioParams(audioMedia)!!
 
-        assertNotNull(audioParams.asc)
-        assertEquals(2, audioParams.asc!!.size)
+        assertNotNull(audioParams.audioSpecificConfig)
+        assertEquals(2, audioParams.audioSpecificConfig!!.size)
     }
 
     @Test
@@ -99,7 +99,7 @@ class SdpParserTest {
         if (audioMedia != null) {
             val params = SdpParser.parseAudioParams(audioMedia)
             // Odd-length hex should fail to parse → null
-            assertTrue(params == null || params.asc == null)
+            assertTrue(params == null || params.audioSpecificConfig == null)
         }
     }
 
