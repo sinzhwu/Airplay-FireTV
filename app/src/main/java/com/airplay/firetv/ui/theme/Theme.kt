@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalTvMaterial3Api::class)
+
 package com.airplay.firetv.ui.theme
 
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -143,7 +145,6 @@ private val Shapes = Shapes(
     extraLarge = RoundedCornerShape(28.dp)
 )
 
-@OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 fun AirPlayTheme(
     content: @Composable () -> Unit

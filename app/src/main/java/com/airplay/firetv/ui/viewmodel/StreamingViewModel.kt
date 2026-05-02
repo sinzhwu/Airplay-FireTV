@@ -22,13 +22,20 @@ class StreamingViewModel(application: Application) : AndroidViewModel(applicatio
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AppSettings())
 
     val receiverState: StateFlow<ReceiverState>
-        get() = serviceController.receiverState
+        get() = serviceController.receiverState ?: settingsRepository.settings
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AppSettings())
+            .let { kotlinx.coroutines.flow.flowOf(ReceiverState.IDLE) }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ReceiverState.IDLE)
 
     val streaming: StateFlow<Boolean>
         get() = serviceController.streaming
+            ?: kotlinx.coroutines.flow.flowOf(false)
+                .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
     val isRunning: StateFlow<Boolean>
         get() = serviceController.isRunning
+            ?: kotlinx.coroutines.flow.flowOf(false)
+                .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
     init {
         Timber.d("StreamingViewModel initialized")

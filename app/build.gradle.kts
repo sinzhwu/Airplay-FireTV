@@ -55,6 +55,13 @@ android {
     }
 }
 
+testOptions {
+    unitTests {
+        isIncludeAndroidResources = true
+        isReturnDefaultValues = true
+    }
+}
+
 dependencies {
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.3")
@@ -86,6 +93,11 @@ dependencies {
 
     // Desugaring
     coreLibraryDesugaring("androidx.core:core-library-desugaring:2.1.3")
+
+    // Unit Testing
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("io.mockk:mockk:1.13.10")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")

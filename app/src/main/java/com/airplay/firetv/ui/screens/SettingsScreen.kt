@@ -31,6 +31,7 @@ import androidx.tv.material3.OutlinedButton
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Switch
 import androidx.tv.material3.Text
+import androidx.compose.ui.unit.sp
 import com.airplay.firetv.settings.AppSettings
 import com.airplay.firetv.ui.viewmodel.StreamingViewModel
 
@@ -91,7 +92,7 @@ fun SettingsScreen(
                         .padding(horizontal = 12.dp, vertical = 10.dp),
                     textStyle = androidx.compose.ui.text.TextStyle(
                         color = Color.White,
-                        fontSize = androidx.compose.ui.unit.sp(16)
+                        fontSize = 16.sp
                     ),
                     cursorBrush = SolidColor(Color.White),
                     singleLine = true

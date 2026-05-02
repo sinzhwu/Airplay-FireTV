@@ -70,7 +70,7 @@ class AirPlayReceiver(private val context: Context) : RtspSession.RtspCallback {
                 mdnsService = MdnsService(context).apply {
                     val macAddress = NetworkUtils.getMacAddress(context)
                     val persistentUuid = NetworkUtils.generatePersistentUuid(macAddress)
-                    start(settings.displayName, macAddress, persistentUuid)
+                    start(settings.displayName, macAddress, persistentUuid.toString())
                 }
 
                 Timber.i("AirPlayReceiver started successfully")

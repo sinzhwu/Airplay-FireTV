@@ -1,4 +1,4 @@
-name: Build APK
+name: Build and Test
 
 on:
   push:
@@ -35,11 +35,15 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      # Step 1: Compile Kotlin (fast feedback on syntax/type errors)
+      # Step 1: Unit Tests (fastest feedback on logic bugs)
+      - name: Run Unit Tests
+        run: ./gradlew test --stacktrace
+
+      # Step 2: Compile Kotlin (syntax/type error check)
       - name: Compile Debug Kotlin
         run: ./gradlew compileDebugKotlin --stacktrace
 
-      # Step 2: Full build (includes resource processing, manifest merge, dex)
+      # Step 3: Full build (includes resource processing, manifest merge, dex)
       - name: Build Debug APK
         run: ./gradlew assembleDebug --stacktrace
 
