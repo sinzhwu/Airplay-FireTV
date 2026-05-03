@@ -47,9 +47,7 @@ class ServiceControllerTest {
         val settings = AppSettings(displayName = "Living Room TV")
         controller.start(settings)
 
-        val extras = slot.captured.extras
-        assertNotNull(extras)
-        assertEquals("Living Room TV", extras!!.getString(PhairPlayService.EXTRA_DISPLAY_NAME))
+        assertEquals("Living Room TV", slot.captured.getStringExtra(PhairPlayService.EXTRA_DISPLAY_NAME))
     }
 
     @Test
@@ -60,9 +58,7 @@ class ServiceControllerTest {
         val settings = AppSettings(autoStart = true)
         controller.start(settings)
 
-        val extras = slot.captured.extras
-        assertNotNull(extras)
-        assertTrue(extras!!.getBoolean(PhairPlayService.EXTRA_AUTO_START))
+        assertTrue(slot.captured.getBooleanExtra(PhairPlayService.EXTRA_AUTO_START, false))
     }
 
     @Test

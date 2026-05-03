@@ -155,11 +155,7 @@ class VideoDecoderSpsTest {
     ): ByteArray {
         val writer = SpsBitWriter()
 
-        // NAL unit header (written into RBSP)
-        writer.writeBits(1, 0)     // forbidden_zero_bit
-        writer.writeBits(2, 3)     // nal_ref_idc = 3
-        writer.writeBits(5, 7)     // nal_unit_type = 7 (SPS)
-
+        // RBSP starts here — NAL header (0x67) is prepended below.
         // profile_idc, constraint_set flags, level_idc
         writer.writeBits(8, profileIdc)
         writer.writeBits(8, 0xE0)  // constraint_set flags
