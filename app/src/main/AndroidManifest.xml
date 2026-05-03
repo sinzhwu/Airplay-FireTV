@@ -23,6 +23,11 @@
     <!-- Boot completion for auto-start -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
+    <!-- Notification permission (Android 13+). Foreground service notifications
+         are exempt from the runtime grant, but the permission must still be
+         declared in the manifest. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <application
         android:name=".AirPlayApplication"
         android:allowBackup="true"
