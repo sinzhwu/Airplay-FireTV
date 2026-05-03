@@ -25,9 +25,9 @@ class RtpInterleavedTest {
         val stream = buildInterleavedStream(buildInterleavedFrame(channel = 0, payload = frame))
 
         RtpInterleaved.readLoop(
-            stream = stream,
-            onVideoPacket = { _, _ -> received = true },
-            onAudioPacket = { _, _ -> fail("Audio should not be triggered") }
+            input = stream,
+            videoCallback = { _, _ -> received = true },
+            audioCallback = { _, _ -> fail("Audio should not be triggered") }
         )
 
         assertTrue("Video callback should have been triggered", received)
@@ -42,9 +42,9 @@ class RtpInterleavedTest {
         val stream = buildInterleavedStream(buildInterleavedFrame(channel = 2, payload = audioRtp))
 
         RtpInterleaved.readLoop(
-            stream = stream,
-            onVideoPacket = { _, _ -> fail("Video should not be triggered") },
-            onAudioPacket = { _, _ -> received = true }
+            input = stream,
+            videoCallback = { _, _ -> fail("Video should not be triggered") },
+            audioCallback = { _, _ -> received = true }
         )
 
         assertTrue("Audio callback should have been triggered", received)
@@ -58,9 +58,9 @@ class RtpInterleavedTest {
         val stream = buildInterleavedStream(buildInterleavedFrame(channel = 1, payload = rtcp))
 
         RtpInterleaved.readLoop(
-            stream = stream,
-            onVideoPacket = { _, _ -> videoCalled = true },
-            onAudioPacket = { _, _ -> audioCalled = true }
+            input = stream,
+            videoCallback = { _, _ -> videoCalled = true },
+            audioCallback = { _, _ -> audioCalled = true }
         )
 
         assertFalse("Video callback should not be triggered", videoCalled)
@@ -73,9 +73,9 @@ class RtpInterleavedTest {
 
         // Should not throw
         RtpInterleaved.readLoop(
-            stream = stream,
-            onVideoPacket = { _, _ -> },
-            onAudioPacket = { _, _ -> }
+            input = stream,
+            videoCallback = { _, _ -> },
+            audioCallback = { _, _ -> }
         )
     }
 
@@ -89,9 +89,9 @@ class RtpInterleavedTest {
         val stream = ByteArrayInputStream(garbage + interleaved)
 
         RtpInterleaved.readLoop(
-            stream = stream,
-            onVideoPacket = { _, _ -> received = true },
-            onAudioPacket = { _, _ -> fail("Audio should not be triggered") }
+            input = stream,
+            videoCallback = { _, _ -> received = true },
+            audioCallback = { _, _ -> fail("Audio should not be triggered") }
         )
 
         assertTrue("Should skip garbage and find the video frame", received)

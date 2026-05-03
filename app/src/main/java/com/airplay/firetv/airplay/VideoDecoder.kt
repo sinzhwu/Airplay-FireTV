@@ -162,7 +162,7 @@ class SpsBitReader(private val data: ByteArray) {
     private var byteOffset = 0
     private var bitOffset = 0 // 0-7, MSB first
 
-    private fun readBit(): Int {
+    internal fun readBit(): Int {
         if (byteOffset >= data.size) return 0
         val bit = (data[byteOffset].toInt() shr (7 - bitOffset)) and 0x1
         bitOffset++
@@ -173,7 +173,7 @@ class SpsBitReader(private val data: ByteArray) {
         return bit
     }
 
-    private fun readBits(n: Int): Int {
+    internal fun readBits(n: Int): Int {
         var result = 0
         repeat(n) {
             result = (result shl 1) or readBit()
@@ -181,7 +181,7 @@ class SpsBitReader(private val data: ByteArray) {
         return result
     }
 
-    private fun readUE(): Int {
+    internal fun readUE(): Int {
         var leadingZeroBits = 0
         while (readBit() == 0 && leadingZeroBits < 32) {
             leadingZeroBits++

@@ -20,7 +20,7 @@ class SdpParserTest {
     fun `valid video plus audio SDP parses correctly`() {
         val session = SdpParser.parse(SDP_VIDEO_AUDIO)
 
-        assertNotNull(session.videoMedia)
+        assertNotNull(session.getVideoMedia())
         assertNotNull(session.getAudioMedia())
         assertEquals(2, session.medias.size)
     }
@@ -43,7 +43,7 @@ class SdpParserTest {
     fun `audio-only SDP without video parses correctly`() {
         val session = SdpParser.parse(SDP_AUDIO_ONLY)
 
-        assertNull(session.videoMedia)
+        assertNull(session.getVideoMedia())
         assertNotNull(session.getAudioMedia())
         assertEquals(1, session.medias.size)
     }
@@ -53,7 +53,7 @@ class SdpParserTest {
         val session = SdpParser.parse("")
 
         assertTrue(session.medias.isEmpty())
-        assertNull(session.videoMedia)
+        assertNull(session.getVideoMedia())
         assertNull(session.getAudioMedia())
     }
 
@@ -106,7 +106,7 @@ class SdpParserTest {
     @Test
     fun `getH264FmtpParams extracts profile level id and sprop`() {
         val session = SdpParser.parse(SDP_VIDEO_AUDIO)
-        val videoMedia = session.videoMedia!!
+        val videoMedia = session.getVideoMedia()!!
         val fmtp = SdpParser.getH264FmtpParams(videoMedia)
 
         assertEquals("1", fmtp["packetization-mode"])
