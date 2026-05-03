@@ -84,11 +84,14 @@ class VideoDecoderSpsTest {
 
     @Test
     fun `parse returns correct resolution for 1080p`() {
+        // 1080 is not divisible by 16 (1080 = 67.5 * 16).
+        // Real H.264 encoders store 1088 macro-block rows and crop 8 pixels.
         val sps = buildBaselineSps(
             profileIdc = 100, // High
             levelIdc = 40,    // Level 4.0
             picWidth = 1920,
-            picHeight = 1080
+            picHeight = 1088,     // 68 * 16 = 1088 macro-block rows
+            frameCropBottom = 4   // crop 8 pixels → 1080
         )
 
         val info = SpsBitReader.parse(sps)
@@ -112,21 +115,26 @@ class VideoDecoderSpsTest {
 
     @Test
     fun `parse handles frame cropping`() {
+        // Use non-zero crop offsets to verify the cropping arithmetic.
+        // 1936 = 121 * 16, 1088 = 68 * 16.
+        // Cropping multiplies offsets by 2 for 4:2:0 chroma subsampling.
         val sps = buildBaselineSps(
             profileIdc = 100,
             levelIdc = 40,
-            picWidth = 1920,
-            picHeight = 1080,
-            frameCropLeft = 0,
-            frameCropRight = 0,
-            frameCropTop = 0,
-            frameCropBottom = 0
+            picWidth = 1936,
+            picHeight = 1088,
+            frameCropLeft = 2,    // 4 pixels
+            frameCropRight = 3,   // 6 pixels
+            frameCropTop = 1,     // 2 pixels
+            frameCropBottom = 4   // 8 pixels
         )
 
         val info = SpsBitReader.parse(sps)
         assertNotNull(info)
-        assertEquals(1920, info!!.width)
-        assertEquals(1080, info.height)
+        // width  = 1936 - (2 + 3) * 2 = 1926
+        assertEquals(1926, info!!.width)
+        // height = 1088 - (1 + 4) * 2 = 1078
+        assertEquals(1078, info.height)
     }
 
     // ----------------------------------------------------------------------

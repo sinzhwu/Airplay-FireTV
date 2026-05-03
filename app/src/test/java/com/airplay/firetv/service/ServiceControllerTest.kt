@@ -4,9 +4,12 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import com.airplay.firetv.settings.AppSettings
+import com.airplay.firetv.service.PhairPlayService
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkConstructor
 import io.mockk.slot
+import io.mockk.unmockkConstructor
 import io.mockk.verify
 import org.junit.Assert.*
 import org.junit.Before
@@ -41,24 +44,53 @@ class ServiceControllerTest {
 
     @Test
     fun `start sends intent with display name extra`() {
-        val slot = slot<Intent>()
-        every { context.startService(capture(slot)) } returns mockk()
+        // In the JVM unit-test environment Intent.getStringExtra() returns null
+        // (android.jar stub).  We therefore verify putExtra() via mockkConstructor.
+        mockkConstructor(Intent::class)
+        every {
+            anyConstructed<Intent>().putExtra(any<String>(), any<String>())
+        } answers { self as Intent }
+        every {
+            anyConstructed<Intent>().putExtra(any<String>(), any<Boolean>())
+        } answers { self as Intent }
+        every { context.startService(any()) } returns mockk()
 
         val settings = AppSettings(displayName = "Living Room TV")
         controller.start(settings)
 
-        assertEquals("Living Room TV", slot.captured.getStringExtra(PhairPlayService.EXTRA_DISPLAY_NAME))
+        verify {
+            anyConstructed<Intent>().putExtra(
+                PhairPlayService.EXTRA_DISPLAY_NAME,
+                "Living Room TV"
+            )
+        }
+        unmockkConstructor(Intent::class)
     }
 
     @Test
     fun `start sends intent with auto start extra`() {
-        val slot = slot<Intent>()
-        every { context.startService(capture(slot)) } returns mockk()
+        // In the JVM unit-test environment Intent.getBooleanExtra() returns the
+        // default value (android.jar stub).  We therefore verify putExtra() via
+        // mockkConstructor.
+        mockkConstructor(Intent::class)
+        every {
+            anyConstructed<Intent>().putExtra(any<String>(), any<String>())
+        } answers { self as Intent }
+        every {
+            anyConstructed<Intent>().putExtra(any<String>(), any<Boolean>())
+        } answers { self as Intent }
+        every { context.startService(any()) } returns mockk()
 
         val settings = AppSettings(autoStart = true)
         controller.start(settings)
 
-        assertTrue(slot.captured.getBooleanExtra(PhairPlayService.EXTRA_AUTO_START, false))
+        verify {
+            anyConstructed<Intent>().putExtra(
+                PhairPlayService.EXTRA_AUTO_START,
+                true
+            )
+        }
+        unmockkConstructor(Intent::class)
     }
 
     @Test
