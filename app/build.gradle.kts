@@ -92,7 +92,7 @@ dependencies {
     implementation("com.jakewharton.timber:timber:5.0.1")
 
     // Desugaring
-    coreLibraryDesugaring("androidx.core:core-library-desugaring:2.1.3")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.3")
 
     // Unit Testing
     testImplementation("junit:junit:4.13.2")
