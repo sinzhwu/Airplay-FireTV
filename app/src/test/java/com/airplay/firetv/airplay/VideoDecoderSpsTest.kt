@@ -14,6 +14,10 @@ import org.junit.Test
  * HOW: We build synthetic SPS bitstreams with a private [SpsBitWriter] helper
  * inside this test class.  This avoids hard-coding binary magic numbers and
  * makes the tests readable and maintainable.
+ *
+ * NOTE: [SpsBitReader.parse] expects a NAL unit prefixed with the H.264
+ * start code (0x00 0x00 0x00 0x01) and checks that NAL type (byte 4 & 0x1F)
+ * equals 7.  Our [buildBaselineSps] helper prepends the start code automatically.
  */
 class VideoDecoderSpsTest {
 
@@ -54,8 +58,9 @@ class VideoDecoderSpsTest {
 
     @Test
     fun `readUE decodes large value`() {
-        // Exp-Golomb: 0000101 → value 5 (leading zero count 6)
-        val reader = SpsBitReader(byteArrayOf(0x05.toByte())) // 0b0000_0101
+        // Exp-Golomb encoding for value 5 is "00110" (2 leading zeros + 110).
+        // Padded to byte boundary: 0b0011_0000 = 0x30.
+        val reader = SpsBitReader(byteArrayOf(0x30)) // 0b0011_0000
 
         assertEquals(5, reader.readUE())
     }
@@ -130,7 +135,13 @@ class VideoDecoderSpsTest {
 
     /**
      * Builds a minimal Baseline/High profile SPS NAL unit.
-     * This is NOT a complete H.264 encoder — just enough for unit tests.
+     *
+     * The returned byte array includes the H.264 start code (0x00 0x00 0x00 0x01)
+     * followed by the NAL header (0x67 = forbidden=0 | nal_ref_idc=3 | type=7)
+     * and the SPS RBSP data.
+     *
+     * This matches the format expected by [SpsBitReader.parse], which reads
+     * NAL type from byte index 4.
      */
     private fun buildBaselineSps(
         profileIdc: Int,
@@ -144,7 +155,7 @@ class VideoDecoderSpsTest {
     ): ByteArray {
         val writer = SpsBitWriter()
 
-        // NAL unit header
+        // NAL unit header (written into RBSP)
         writer.writeBits(1, 0)     // forbidden_zero_bit
         writer.writeBits(2, 3)     // nal_ref_idc = 3
         writer.writeBits(5, 7)     // nal_unit_type = 7 (SPS)
@@ -204,11 +215,21 @@ class VideoDecoderSpsTest {
         // RBSP trailing bits
         writer.writeBits(1, 1) // rbsp_stop_one_bit
 
-        return writer.toByteArray()
+        val rbspData = writer.toByteArray()
+
+        // Prepend H.264 start code + NAL header (0x67 = nal_ref_idc=3, type=7)
+        val startCode = byteArrayOf(0x00, 0x00, 0x00, 0x01)
+        val nalHeader = byteArrayOf(0x67.toByte())
+        return startCode + nalHeader + rbspData
     }
 
     /**
      * A minimal bit writer for building synthetic SPS NAL units in tests.
+     *
+     * [writeUE] implements the correct H.264 Exp-Golomb unsigned encoding:
+     * - codeNum = 0 → "1"
+     * - codeNum > 0 → (leadingZeroBits = floor(log2(codeNum+1))) zeros,
+     *   followed by (codeNum + 1) in binary
      */
     private class SpsBitWriter {
         private val bits = mutableListOf<Int>()
@@ -220,19 +241,18 @@ class VideoDecoderSpsTest {
         }
 
         fun writeUE(value: Int) {
-            // Exp-Golomb unsigned encoding
             val codeNum = value
             if (codeNum == 0) {
                 writeBits(1, 1)
                 return
             }
-            val leadingZeros = (32 - codeNum.countLeadingZeroBits()) - 1
-            writeBits(leadingZeros, 0)
-            writeBits(leadingZeros + 1, codeNum + 1)
+            val leadingZeros = 31 - (codeNum + 1).countLeadingZeroBits()
+            val totalBits = 2 * leadingZeros + 1
+            writeBits(totalBits, codeNum + 1)
         }
 
         fun toByteArray(): ByteArray {
-            // Pad to byte boundary
+            // Pad to byte boundary with zeros
             while (bits.size % 8 != 0) {
                 bits.add(0)
             }
