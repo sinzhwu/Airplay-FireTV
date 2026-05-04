@@ -1,6 +1,7 @@
 package com.airplay.firetv.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,10 +20,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.tv.material3.Button
 import androidx.tv.material3.ButtonDefaults
 import androidx.tv.material3.ExperimentalTvMaterial3Api
@@ -31,7 +34,6 @@ import androidx.tv.material3.OutlinedButton
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Switch
 import androidx.tv.material3.Text
-import androidx.compose.ui.unit.sp
 import com.airplay.firetv.settings.AppSettings
 import com.airplay.firetv.ui.viewmodel.StreamingViewModel
 
@@ -80,16 +82,27 @@ fun SettingsScreen(
                     color = Color.Gray
                 )
                 Spacer(modifier = Modifier.height(8.dp))
+
+                var isTextFieldFocused by remember { mutableStateOf(false) }
                 BasicTextField(
                     value = displayName,
                     onValueChange = { displayName = it },
                     modifier = Modifier
                         .fillMaxWidth()
+                        .border(
+                            width = if (isTextFieldFocused) 2.dp else 1.dp,
+                            color = if (isTextFieldFocused)
+                                MaterialTheme.colorScheme.primary
+                            else
+                                Color(0x33FFFFFF),
+                            shape = androidx.compose.foundation.shape.RoundedCornerShape(4.dp)
+                        )
                         .background(
                             color = Color(0x33FFFFFF),
                             shape = androidx.compose.foundation.shape.RoundedCornerShape(4.dp)
                         )
-                        .padding(horizontal = 12.dp, vertical = 10.dp),
+                        .padding(horizontal = 12.dp, vertical = 10.dp)
+                        .onFocusChanged { isTextFieldFocused = it.isFocused },
                     textStyle = androidx.compose.ui.text.TextStyle(
                         color = Color.White,
                         fontSize = 16.sp

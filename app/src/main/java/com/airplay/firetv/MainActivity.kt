@@ -3,6 +3,7 @@
 package com.airplay.firetv
 
 import android.os.Bundle
+import android.view.KeyEvent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -10,6 +11,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.ExperimentalTvMaterial3Api
@@ -17,6 +21,7 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
 import com.airplay.firetv.airplay.ReceiverState
 import com.airplay.firetv.service.ServiceController
+import com.airplay.firetv.ui.screens.SettingsScreen
 import com.airplay.firetv.ui.screens.StreamingScreen
 import com.airplay.firetv.ui.screens.WaitingScreen
 import com.airplay.firetv.ui.theme.AirPlayTheme
@@ -40,7 +45,10 @@ class MainActivity : ComponentActivity() {
                 Surface(
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    AirPlayApp(viewModel = viewModel, serviceController = serviceController)
+                    AirPlayApp(
+                        viewModel = viewModel,
+                        serviceController = serviceController
+                    )
                 }
             }
         }
@@ -65,24 +73,37 @@ fun AirPlayApp(
     serviceController: ServiceController
 ) {
     val receiverState by viewModel.receiverState.collectAsStateWithLifecycle(ReceiverState.IDLE)
+    var showSettings by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         Timber.d("AirPlayApp composition started")
     }
 
+    // Main content based on receiver state
     when (receiverState) {
         ReceiverState.STREAMING -> {
             StreamingScreen(
                 serviceController = serviceController,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
+                onShowSettings = { showSettings = true }
             )
         }
 
         else -> {
             WaitingScreen(
                 viewModel = viewModel,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
+                onShowSettings = { showSettings = true }
             )
         }
+    }
+
+    // Settings overlay (shown on top of main content)
+    if (showSettings) {
+        SettingsScreen(
+            viewModel = viewModel,
+            onDismiss = { showSettings = false },
+            modifier = Modifier.fillMaxSize()
+        )
     }
 }

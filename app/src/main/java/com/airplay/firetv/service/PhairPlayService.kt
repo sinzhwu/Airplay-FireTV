@@ -6,9 +6,11 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
+import android.content.pm.ServiceInfo
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
+import android.os.PowerManager
 import android.view.Surface
 import androidx.core.app.NotificationCompat
 import com.airplay.firetv.R
@@ -27,10 +29,12 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class PhairPlayService : Service() {
+class PhairPlayService : Service() {
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     private var receiver: AirPlayReceiver? = null
+    private var wakeLock: PowerManager.WakeLock? = null
 
     private val _isRunning = MutableStateFlow(false)
     val isRunning: StateFlow<Boolean> = _isRunning.asStateFlow()
@@ -72,8 +76,28 @@ class PhairPlayService : Service() {
         }
 
         try {
-            startForeground(NOTIFICATION_ID, buildNotification("Initializing..."))
+            // Android 14+ requires foregroundServiceType in startForeground()
+            val notification = buildNotification("Initializing...")
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                startForeground(
+                    NOTIFICATION_ID,
+                    notification,
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE
+                )
+            } else {
+                startForeground(NOTIFICATION_ID, notification)
+            }
             _isRunning.value = true
+
+            // Acquire partial wake lock to keep CPU running when screen is off
+            val powerManager = getSystemService(POWER_SERVICE) as PowerManager
+            wakeLock = powerManager.newWakeLock(
+                PowerManager.PARTIAL_WAKE_LOCK,
+                "AirPlay::ServiceWakeLock"
+            ).apply {
+                setReferenceCounted(false)
+                acquire(10 * 60 * 1000L) // 10 minutes, will be re-acquired periodically
+            }
 
             receiver = AirPlayReceiver(this).apply {
                 start(settings)
@@ -81,7 +105,7 @@ class PhairPlayService : Service() {
                 serviceScope.launch {
                     state.collectLatest { state ->
                         _receiverState.value = state
-                        updateNotification(state)
+                        updateForegroundNotification(state)
                     }
                 }
 
@@ -96,20 +120,26 @@ class PhairPlayService : Service() {
         } catch (e: Exception) {
             Timber.e(e, "Failed to start service")
             stopService()
+        fun stopService() {
+            Timber.i("PhairPlayService stopping...")
+    
+            receiver?.release()
+            receiver = null
+    
+            _isRunning.value = false
+            _receiverState.value = ReceiverState.IDLE
+            _streaming.value = false
+    
+            try {
+                wakeLock?.release()
+            } catch (e: Exception) {
+                Timber.w(e, "Error releasing wake lock")
+            }
+            wakeLock = null
+    
+            stopForeground(STOP_FOREGROUND_REMOVE)
+            stopSelf()
         }
-    }
-
-    fun stopService() {
-        Timber.i("PhairPlayService stopping...")
-
-        receiver?.release()
-        receiver = null
-
-        _isRunning.value = false
-        _receiverState.value = ReceiverState.IDLE
-        _streaming.value = false
-
-        stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
     }
 
@@ -122,6 +152,10 @@ class PhairPlayService : Service() {
         Timber.i("PhairPlayService onDestroy")
         receiver?.release()
         receiver = null
+        try {
+            wakeLock?.release()
+        } catch (_: Exception) {}
+        wakeLock = null
         serviceScope.cancel()
     }
 
@@ -161,7 +195,15 @@ class PhairPlayService : Service() {
             .build()
     }
 
-    private fun updateNotification(state: ReceiverState) {
+    /**
+     * Updates the foreground service notification.
+     *
+     * CRITICAL: On Android 14+ you must use startForeground() to update the
+     * notification of an active foreground service. Using NotificationManager
+     * .notify() causes the system to think the service has abandoned its
+     * foreground state, leading to termination after ~1-2 minutes.
+     */
+    private fun updateForegroundNotification(state: ReceiverState) {
         val text = when (state) {
             ReceiverState.IDLE -> "Idle"
             ReceiverState.ADVERTISING -> "Waiting for connection..."
@@ -171,8 +213,15 @@ class PhairPlayService : Service() {
         }
 
         val notification = buildNotification(text)
-        val manager = getSystemService(NotificationManager::class.java)
-        manager.notify(NOTIFICATION_ID, notification)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            startForeground(
+                NOTIFICATION_ID,
+                notification,
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE
+            )
+        } else {
+            startForeground(NOTIFICATION_ID, notification)
+        }
     }
 
     companion object {

@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.tv.material3.Button
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
@@ -25,6 +26,7 @@ import com.airplay.firetv.ui.viewmodel.StreamingViewModel
 @Composable
 fun WaitingScreen(
     viewModel: StreamingViewModel,
+    onShowSettings: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -74,8 +76,21 @@ fun WaitingScreen(
 
             Spacer(modifier = Modifier.height(48.dp))
 
+            // Settings button - navigable with TV remote D-pad
+            Button(
+                onClick = onShowSettings,
+                modifier = Modifier.padding(8.dp)
+            ) {
+                Text(
+                    text = "Settings",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             Text(
-                text = "Swipe up from remote to open settings",
+                text = "Press MENU on remote to open settings",
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.DarkGray,
                 textAlign = TextAlign.Center
