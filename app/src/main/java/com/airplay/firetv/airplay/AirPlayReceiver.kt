@@ -61,17 +61,22 @@ class AirPlayReceiver(private val context: Context) : RtspSession.RtspCallback {
                 _state.value = ReceiverState.ADVERTISING
                 Timber.i("AirPlayReceiver starting...")
 
-                // Start RTSP handler first
+                // Start RTSP handler first so the port is listening before
+                // iOS discovers us via mDNS.
                 rtspHandler = RtspHandler(this@AirPlayReceiver).apply {
                     start()
                 }
 
-                // Start mDNS advertising
+                // Start mDNS advertising so iOS can discover this device
                 mdnsService = MdnsService(context).apply {
                     val macAddress = NetworkUtils.getMacAddress(context)
                     val persistentUuid = NetworkUtils.generatePersistentUuid(macAddress)
                     start(settings.displayName, macAddress, persistentUuid.toString())
                 }
+
+                // Give jmDNS a moment to complete registration before reporting success.
+                // This ensures iOS can see the service immediately after start returns.
+                kotlinx.coroutines.delay(500)
 
                 Timber.i("AirPlayReceiver started successfully")
             } catch (e: Exception) {

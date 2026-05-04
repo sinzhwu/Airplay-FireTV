@@ -88,6 +88,9 @@ dependencies {
     // Bouncy Castle for RSA/AES crypto
     implementation("org.bouncycastle:bcprov-jdk18on:1.78.1")
 
+    // jmDNS for reliable mDNS service discovery on Fire TV
+    implementation("org.jmdns:jmdns:3.5.9")
+
     // Timber logging
     implementation("com.jakewharton.timber:timber:5.0.1")
 
